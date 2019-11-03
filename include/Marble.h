@@ -1,0 +1,30 @@
+
+#ifndef MARBLE_H
+#define MARBLE_H
+
+#include <glm/vec3.hpp>
+#include <Shader.h>
+
+class Marble {
+
+	unsigned int m_vao, m_vertices;
+
+	double m_radius;
+	glm::vec3 m_pos, m_vel;
+
+	void LoadObjectModel ();
+public:
+	Marble (glm::vec3 pos, double radius);
+
+	void Update (float dt);
+	void Render (Shader &shader);
+
+	void SetPos (glm::vec3 pos);
+  void AddPos (glm::vec3 rel_pos);
+	void SetVel (glm::vec3 vel);
+
+	double TimeUntil (const Marble &other);
+	void Collide (const Marble &other);
+};
+
+#endif

@@ -1,0 +1,10 @@
+
+# Library includes
+glm
+include/glad
+include/KHR
+
+# Glad lib source
+src/glad.c
+
+notes

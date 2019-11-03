@@ -1,0 +1,155 @@
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <glm/ext/matrix_transform.hpp>
+
+#include <Marble.h>
+
+Marble::Marble (glm::vec3 pos, double rad):
+	m_pos(pos), m_vel(0.0f), m_radius(rad)
+{
+	// vec3 zero = {0,0,0};
+	// vec3_add(m_pos, pos, zero);
+	// vec3_add(m_vel, zero, zero);
+	// m_radius = rad;
+	LoadObjectModel();
+}
+
+void Marble::Update (float dt) {
+	m_pos += m_vel*dt;
+} // Update
+
+void Marble::AddPos (glm::vec3 rel_pos) {
+	m_pos += rel_pos;
+}
+
+void Marble::Render (Shader &shader) {
+	glm::mat4 model = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3((float)m_radius)), m_pos);
+	glm::mat4 local(1.0f);
+
+	shader.setModel(model);
+	shader.setLocal(local);
+
+	glBindVertexArray(m_vao);
+	// glDrawArrays(GL_TRIANGLE_STRIP, 0, m_vertices);
+	glDrawElements(GL_TRIANGLE_STRIP, m_vertices, GL_UNSIGNED_INT, (void*)0);
+	glBindVertexArray(0);
+} // Render
+
+double Marble::TimeUntil (const Marble &other) {
+	// Two lines, starting each m_pos and other.m_pos
+	// Going in direction m_vel and other.m_vel
+
+	/*
+	ind t;
+	this = m_pos + t*m_vel
+		x = m_x + t*m_u
+		y = m_y + t*m_v
+		z = m_z + t*m_w
+	that = other.m_pos + t*other.m_vel
+		x = m_x + t*m_u
+		y = m_y + t*m_v
+		z = m_z + t*m_w
+	diff = this-that
+		dx = (m_x - o.m_x) + t*(m_u - o.m_u)
+		dy = (m_y - o.m_y) + t*(m_v - o.m_v)
+		dz = (m_z - o.m_z) + t*(m_w - o.m_w)
+	d2 = dot(diff, diff)
+	d2 = [(m_x - o.m_x) + t*(m_u - o.m_u)]^2 + [(m_y - o.m_y) + t*(m_v - o.m_v)]^2 + [(m_z - o.m_z) + t*(m_w - o.m_w)]^2
+	d = sqrt(d2)
+	[m_r + o.m_r]^2 = [(m_x - o.m_x) + t*(m_u - o.m_u)]^2 + [(m_y - o.m_y) + t*(m_v - o.m_v)]^2 + [(m_z - o.m_z) + t*(m_w - o.m_w)]^2
+	[m_r*o.m_r + 2*m_r*o.m_r + o.m_r*o.m_r] = [(m_x-o.m_x)^2 + 2*t*(m_u-o.m_u)*(m_x-o.m_x) + t^2*(m_u-o.m_u)^2] +
+						  [(m_y-o.m_y)^2 + 2*t*(m_v-o.m_v)*(m_y-o.m_y) + t^2*(m_v-o.m_v)^2] +
+						  [(m_z-o.m_z)^2 + 2*t*(m_w-o.m_w)*(m_z-o.m_z) + t^2*(m_w-o.m_w)^2] +
+	t^2 *  [(m_u-o.m_u)^2 + (m_v-o.m_v)^2 + (m_w-o.m_w)^2] +
+	t   * 2[(m_u-o.m_u)*(m_x-o.m_x) + (m_v-o.m_v)*(m_y-o.m_y) + (m_w-o.m_w)*(m_z-o.m_z)] +
+	1   *  [(m_x-o.m_x)^2 + (m_y-o.m_y)^2 + (m_z-o.m_z)^2 - (m_r+o.m_r)^2]
+	a, b, c = ...
+
+	inner = b^2 - 4*a*c
+	if inner < 0: no solution
+		tmin = -1
+		tmax = -1
+	if inner = 0: 1 solution:
+		tmin = -b / 2*a
+		tmax = tmin
+	if inner > 0: 2 solutions:
+		tmin = [-b - sqrt(b^2 - 4*a*c)] / 2*a
+		tmax = [-b + sqrt(b^2 - 4*a*c)] / 2*a
+	objective: d = m_radius + other.m_radius
+	*/
+	/*
+	vec3 dpos, dvel;
+	vec3_sub(dpos, m_pos, other.m_pos);
+	vec3_sub(dvel, m_vel, other.m_vel);
+
+	double rad = m_radius + other.m_radius;
+
+	double a =     vec3_mul_inner(dvel, dvel);
+	double b = 2 * vec3_mul_inner(dpos, dvel);
+	double c =     vec3_mul_inner(dpos, dpos) - rad*rad;
+
+	double inner = b*b - 4*a*c;
+	if (inner < 0)
+		return -1;
+
+	double one_over_2a = 0.5 / a;
+	if (inner == 0)
+		return -b * one_over_2a;
+
+	double sqrt_inner = sqrt(inner);
+
+	double tmin = (-b - sqrt_inner) * one_over_2a;
+	double tmax = (-b + sqrt_inner) * one_over_2a;
+
+	if (tmin < 0)
+		return tmax;
+	return tmin;
+	*/
+	return -1;
+
+}
+
+void Marble::Collide (const Marble &other) {
+
+}
+
+void Marble::LoadObjectModel () {
+
+	/*
+		//Model will be a circle made from a triangle fan,
+		//each triangle with one vertex at the center.
+
+		//There will be 1 (center) + n
+
+		Model will be a square, with side-length 1/sqrt(2)
+		Thus, it's circumscribed circle will have radius 1
+	*/
+	float square[12] = {
+		  1.0, 0.0, 0.0 ,
+		  0.0, 1.0, 0.0 ,
+		 -1.0, 0.0, 0.0 ,
+		  0.0,-1.0, 0.0
+	};
+
+	int indices[] = {
+		0, 1, 3, 2
+	};
+	m_vertices = 4;
+
+	glGenVertexArrays(1, &m_vao);
+	glBindVertexArray(m_vao);
+
+	unsigned int vbo, ebo;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+}
