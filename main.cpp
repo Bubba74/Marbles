@@ -15,8 +15,9 @@
 
 #include <Camera.h>
 #include <Shader.h>
-#include <Marble.h>
+
 #include <Grid.h>
+#include <NormalDistribution.h>
 
 using namespace std;
 
@@ -63,7 +64,7 @@ int main () {
   glm::mat4 perspective =
   // glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
   glm::perspective(fov, (float)win_frame[0]/(float)win_frame[1], near, far);
-  glm::vec3 cam_pos (0,0,1);
+  glm::vec3 cam_pos (0,0,10);
   glm::vec3 cam_dir (0,0,-1);
   glm::mat4 view = glm::lookAt(
     cam_pos,
@@ -75,29 +76,17 @@ int main () {
 
   shader.use();
   shader.setPerspective(perspective);
-  shader.setView(local);
+  shader.setView(view);
   shader.setModel(model);
   shader.setLocal(local);
 
-  glm::vec4 tests[] = {
-    glm::vec4(1,0,0,1),
-    glm::vec4(0,1,0,1)
-  };
-  glm::vec4 o;
-  for (int i=0; i<2; i++) {
-    o = perspective * view * tests[i];
-
-    float *a = &tests[i][0];
-    cout << "Input: " << a[0] << "," << a[1] << "," << a[2] << "," << a[3] <<
-         "\tOutput: " << o[0] << "," << o[1] << "," << o[2] << "," << o[3] << endl;
-    cout << "Input: " << glm::to_string(tests[i]) << "\tOutput: " << glm::to_string(o) << endl;
-  }
-
-  glm::vec3 marble_init_pos = {0, 0, 0};
-  Marble marble (marble_init_pos, 0.5);
-
+  // Background unit grid
   Grid grid;
+  // Simulation
+  NormalDistribution simulation (1);
+  bool tick_stop = false;
 
+  // Track cursor movement
   double cursor_prev[2] = {win_frame[0]/2.0, win_frame[1]/2.0}, cursor_pos[2];
   glfwGetCursorPos(window, cursor_prev, cursor_prev+1);
   double cam_yaw = -3.14159/2, cam_pitch;
@@ -105,18 +94,13 @@ int main () {
   int count = 0;
   glClearColor(0.4, 0.8, 0.9, 1);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_BLEND);
+  glEnable(GL_DEPTH_TEST);
   while (!glfwWindowShouldClose(window)){
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
+    if (glfwGetKey(window, GLFW_KEY_C) != GLFW_PRESS)
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    int up = glfwGetKey(window, GLFW_KEY_UP);
-    int Do = glfwGetKey(window, GLFW_KEY_DOWN);
-    int le = glfwGetKey(window, GLFW_KEY_LEFT);
-    int ri = glfwGetKey(window, GLFW_KEY_RIGHT);
-    marble.AddPos(0.2f*glm::vec3(up-Do, 0, ri-le));
-
-    cam_pos += 0.1f * glm::vec3(
+    cam_pos += 1.f * glm::vec3(
       glfwGetKey(window, GLFW_KEY_D) - glfwGetKey(window, GLFW_KEY_A),
       glfwGetKey(window, GLFW_KEY_SPACE) - glfwGetKey(window, GLFW_KEY_LEFT_SHIFT),
       glfwGetKey(window, GLFW_KEY_S) - glfwGetKey(window, GLFW_KEY_W)
@@ -138,21 +122,30 @@ int main () {
       cam_pos+cam_dir,
       glm::vec3(0,1,0)
     );
-    if (count++ % 50 == 0) {
-      cout << "Target: " << glm::to_string(cam_pos+cam_dir) << endl;
-      cout << "Input: (1,0,0,1) Output: " << glm::to_string(perspective*view*glm::vec4(1,0,0,1)) << endl;
-    }
+    // if (count++ % 500 == 0) {
+    //   cout << "Target: " << glm::to_string(cam_pos+cam_dir) << endl;
+    //   cout << "Input: (1,0,0,1) Output: " << glm::to_string(perspective*view*glm::vec4(1,0,0,1)) << endl;
+    // }
 
     shader.use();
     shader.setView(view);
-    marble.Render(shader);
     grid.Render(shader);
+    simulation.Render(shader);
+
+    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
+      simulation.tick();
+    if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+      if (!tick_stop)
+        simulation.tick();
+      tick_stop = true;
+    } else
+      tick_stop = false;
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
       glfwSetWindowShouldClose(window, GL_TRUE);
 
-		glfwPollEvents();
     glfwSwapBuffers(window);
+		glfwPollEvents();
   }
 }
 

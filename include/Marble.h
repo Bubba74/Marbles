@@ -22,6 +22,7 @@ public:
 	void SetPos (glm::vec3 pos);
   void AddPos (glm::vec3 rel_pos);
 	void SetVel (glm::vec3 vel);
+	void SetRad (double);
 
 	double TimeUntil (const Marble &other);
 	void Collide (const Marble &other);

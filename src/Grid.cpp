@@ -13,7 +13,7 @@ Grid::Grid ()
 void Grid::Render (Shader &shader) {
 	glBindVertexArray(m_vao);
 
-	float width = 0.05f, height = 10.0f;
+	float small = 0.05f, large = 10.0f;
 	for (int i=-10; i<=10; i++) {
 		glm::mat4 model =
 			glm::scale(
@@ -21,7 +21,7 @@ void Grid::Render (Shader &shader) {
 					glm::mat4(1.0f),
 					glm::vec3((float)i, 0, 0)
 				),
-				glm::vec3(width, height, 1.0f)
+				glm::vec3(small, large, 1.0f)
 		);
 
 		shader.setModel(model);
@@ -34,7 +34,7 @@ void Grid::Render (Shader &shader) {
 					glm::mat4(1.0f),
 					glm::vec3(0, (float)i, 0)
 				),
-				glm::vec3(height, width, 1.1f)
+				glm::vec3(large, small, 1.0f)
 		);
 
 		shader.setModel(model);
@@ -48,13 +48,13 @@ void Grid::LoadObjectModel () {
 
 	float square[12] = {
 		  1.0, 1.0,-0.1,
-		 -2.0, 2.0,-0.1,
-		  2.0,-2.0,-0.1,
+		 -1.0, 1.0,-0.1,
+		  1.0,-1.0,-0.1,
 		 -1.0,-1.0,-0.1
 	};
 
 	int indices[] = {
-		0, 1, 3, 2
+		0, 1, 2, 3
 	};
 	m_vertices = 4;
 

@@ -8,31 +8,40 @@
 Marble::Marble (glm::vec3 pos, double rad):
 	m_pos(pos), m_vel(0.0f), m_radius(rad)
 {
-	// vec3 zero = {0,0,0};
-	// vec3_add(m_pos, pos, zero);
-	// vec3_add(m_vel, zero, zero);
-	// m_radius = rad;
 	LoadObjectModel();
 }
 
 void Marble::Update (float dt) {
 	m_pos += m_vel*dt;
-} // Update
+}
 
+void Marble::SetPos (glm::vec3 pos) {
+	m_pos = pos;
+}
 void Marble::AddPos (glm::vec3 rel_pos) {
 	m_pos += rel_pos;
 }
+void Marble::SetRad (double radius) {
+	m_radius = radius;
+}
 
 void Marble::Render (Shader &shader) {
-	glm::mat4 model = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3((float)m_radius)), m_pos);
+	glm::mat4 model =
+		glm::scale(
+			glm::translate(
+				glm::mat4(1.0f),
+				m_pos
+			),
+			glm::vec3((float)m_radius, (float)m_radius, 1)
+	);
+
 	glm::mat4 local(1.0f);
 
 	shader.setModel(model);
 	shader.setLocal(local);
 
 	glBindVertexArray(m_vao);
-	// glDrawArrays(GL_TRIANGLE_STRIP, 0, m_vertices);
-	glDrawElements(GL_TRIANGLE_STRIP, m_vertices, GL_UNSIGNED_INT, (void*)0);
+	glDrawElements(GL_TRIANGLES, m_vertices, GL_UNSIGNED_INT, (void*)0);
 	glBindVertexArray(0);
 } // Render
 
@@ -122,20 +131,40 @@ void Marble::LoadObjectModel () {
 
 		//There will be 1 (center) + n
 
-		Model will be a square, with side-length 1/sqrt(2)
+		Model will be a poly, with (deprecated) side-length 1/sqrt(2)
 		Thus, it's circumscribed circle will have radius 1
 	*/
-	float square[12] = {
-		  1.0, 0.0, 0.0 ,
-		  0.0, 1.0, 0.0 ,
-		 -1.0, 0.0, 0.0 ,
-		  0.0,-1.0, 0.0
-	};
+	const int segments = 240;
+	glm::vec3 poly[1+segments];
 
-	int indices[] = {
-		0, 1, 3, 2
-	};
-	m_vertices = 4;
+	poly[0] = glm::vec3(0.0f);
+	for (int i=0; i<segments; i++) {
+		float theta = i*2.0f*3.14159f/segments;
+		poly[i+1] =
+			glm::vec3(
+				cosf(theta),
+				sinf(theta),
+				0.1f
+		);
+	}
+	// {
+	// 	  1.0, 0.0, 0.1,
+	// 	  0.0, 1.0, 0.1,
+	// 	 -1.0, 0.0, 0.1,
+	// 	  0.0,-1.0, 0.1
+	// };
+
+	m_vertices = 3*segments;
+	int indices[m_vertices];
+	for (int i=0; i<segments; i++) {
+		indices[3*i] = 0;
+		indices[3*i+1] = i+1;
+		indices[3*i+2] = i+2 <= segments ? i+2 : 1;
+	}
+
+	// {
+	// 	0, 1, 2,
+	// };
 
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
@@ -143,7 +172,7 @@ void Marble::LoadObjectModel () {
 	unsigned int vbo, ebo;
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(poly), poly, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(0);
 
