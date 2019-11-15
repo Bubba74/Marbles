@@ -122,7 +122,10 @@ class NormalDistribution {
       // Assume this and o are colliding at their boundaries
       glm::vec3 delta = m_pos - o.m_pos;  // a - b, really doesn't matter
 
-      if (glm::dot(delta, delta) > (m_rad + o.m_rad)*(m_rad + o.m_rad)) {
+      glm::fvec3 dvel = m_vel - o.m_vel;
+    	float b = 2.0f * glm::dot(delta, dvel);
+
+      if (b >= 0 || glm::dot(delta, delta) > (m_rad + o.m_rad)*(m_rad + o.m_rad)) {
         // printf("Not colliding: %.f\n", glm::dot(delta, delta));
         return;
       }
