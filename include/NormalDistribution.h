@@ -88,6 +88,9 @@ class NormalDistribution {
     	objective: d = m_radius + other.m_radius
     	*/
 
+      if (!m_canmove && !o.m_canmove)
+        return -1.f;
+
     	glm::fvec3 dpos = m_pos - o.m_pos,
                 dvel = m_vel - o.m_vel;
       float rad = m_rad + o.m_rad;
@@ -187,42 +190,42 @@ class NormalDistribution {
       b.update((float)dt);
     }
   }
-void setup1(int m_count){
-  m_balls.reserve(m_count+3);
 
-  // m_balls.emplace_back(glm::vec3(-1000.f, 0.f, 0.1f), 990.f, 1000.f);
-  m_balls.emplace_back(glm::vec3(-1.f, 0.f, 0.1f), .3f, 1000.f);
-  m_balls[0].fix();
-  // m_balls.emplace_back(glm::vec3(1000.f, 0.f, 0.1f), 990.f, 1000.f);
-  // m_balls.emplace_back(glm::vec3(0.f, -1000.f, 0.1f), 1000.f, 1000.f);
-  m_balls.emplace_back(glm::vec3(1.f, 0.f, 0.1f), .3f, 1000.f);
-  m_balls[1].fix();
-  m_balls.emplace_back(glm::vec3(0.f, 0.f, 0.1f), .3f, 1000.f);
-  m_balls[2].fix();
-  cout << "Ground: " << glm::to_string(m_balls[2].pos()) << m_balls[2].rad() << endl;
-  float start_x, start_y, start_z = 0.1f;
-  srand(time(NULL));
-  for (int i=0; i<m_count; i++) {
-    start_x = rand()%18-9;
-    start_y = rand()%10+5;
-    start_x = 0; start_y = 10;
-    m_balls.emplace_back(glm::vec3(start_x, start_y, start_z));
+  void setup1(int m_count){
+    m_balls.reserve(m_count+3);
+
+    // m_balls.emplace_back(glm::vec3(-1000.f, 0.f, 0.1f), 990.f, 1000.f);
+    m_balls.emplace_back(glm::vec3(-5.f, 0.f, 0.1f), 5.f, 1000.f);
+    m_balls[0].fix();
+    // m_balls.emplace_back(glm::vec3(1000.f, 0.f, 0.1f), 990.f, 1000.f);
+    m_balls.emplace_back(glm::vec3(5.f, 0.f, 0.1f), 5.f, 1000.f);
+    m_balls[1].fix();
+    // m_balls.emplace_back(glm::vec3(0.f, -1000.f, 0.1f), 1000.f, 1000.f);
+    m_balls.emplace_back(glm::vec3(0.f, -5.f, 0.1f), 5.f, 1000.f);
+    m_balls[2].fix();
+    cout << "Ground: " << glm::to_string(m_balls[2].pos()) << m_balls[2].rad() << endl;
+    float start_x, start_y, start_z = 0.1f;
+    for (int i=0; i<m_count; i++) {
+      start_x = rand()%18-9;
+      start_y = rand()%10+5;
+      start_x = 4; start_y = 5.6f;
+      m_balls.emplace_back(glm::vec3(start_x, start_y, start_z), 0.1f);
+    }
   }
-}
-void setup2(int m_count){
-  m_balls.reserve(2);
+  void setup2(int m_count){
+    m_balls.reserve(2);
 
-  m_balls.emplace_back(glm::vec3(0.f,0.f,0.1f), 1.f, 10000.f);
-  m_balls[0].fix();
-  m_balls.emplace_back(glm::vec3(0.f,1.5f,0.1f), 0.5f, 1.f);
-}
+    m_balls.emplace_back(glm::vec3(0.f,0.f,0.1f), 1.f, 10000.f);
+    m_balls[0].fix();
+    m_balls.emplace_back(glm::vec3(0.f,1.5f,0.1f), 0.5f, 1.f);
+  }
 public:
   NormalDistribution(int m_count):
     m_renderObject(glm::vec3(0.0f), 0.3f)
   {
     srand(time(NULL));
 
-    setup2(m_count);
+    setup1(m_count);
   }
 
   void tick() {
@@ -234,7 +237,7 @@ public:
 
 
     double now = 0.0f;
-    double tick_duration = 0.5f;
+    double tick_duration = .5f;
     while (now < tick_duration) {
       // Process current collisions
       for (int i=0; i<m_balls.size(); i++) {

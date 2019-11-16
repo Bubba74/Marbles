@@ -92,7 +92,7 @@ int main () {
   double cam_yaw = -3.14159/2, cam_pitch;
 
   int count = 0;
-  glClearColor(0.4, 0.8, 0.9, 1);
+  glClearColor(0.3, 0.1, 0.5, 1);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
   glEnable(GL_DEPTH_TEST);
@@ -100,7 +100,7 @@ int main () {
     if (glfwGetKey(window, GLFW_KEY_C) != GLFW_PRESS)
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    cam_pos += 1.f * glm::vec3(
+    cam_pos += .1f * glm::vec3(
       glfwGetKey(window, GLFW_KEY_D) - glfwGetKey(window, GLFW_KEY_A),
       glfwGetKey(window, GLFW_KEY_SPACE) - glfwGetKey(window, GLFW_KEY_LEFT_SHIFT),
       glfwGetKey(window, GLFW_KEY_S) - glfwGetKey(window, GLFW_KEY_W)
@@ -122,10 +122,6 @@ int main () {
       cam_pos+cam_dir,
       glm::vec3(0,1,0)
     );
-    // if (count++ % 500 == 0) {
-    //   cout << "Target: " << glm::to_string(cam_pos+cam_dir) << endl;
-    //   cout << "Input: (1,0,0,1) Output: " << glm::to_string(perspective*view*glm::vec4(1,0,0,1)) << endl;
-    // }
 
     shader.use();
     shader.setView(view);
@@ -145,7 +141,7 @@ int main () {
       glfwSetWindowShouldClose(window, GL_TRUE);
 
     glfwSwapBuffers(window);
-		glfwPollEvents();
+    glfwPollEvents();
   }
 }
 
