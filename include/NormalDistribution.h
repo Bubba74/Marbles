@@ -187,46 +187,45 @@ class NormalDistribution {
       b.update((float)dt);
     }
   }
+void setup1(int m_count){
+  m_balls.reserve(m_count+3);
 
+  // m_balls.emplace_back(glm::vec3(-1000.f, 0.f, 0.1f), 990.f, 1000.f);
+  m_balls.emplace_back(glm::vec3(-1.f, 0.f, 0.1f), .3f, 1000.f);
+  m_balls[0].fix();
+  // m_balls.emplace_back(glm::vec3(1000.f, 0.f, 0.1f), 990.f, 1000.f);
+  // m_balls.emplace_back(glm::vec3(0.f, -1000.f, 0.1f), 1000.f, 1000.f);
+  m_balls.emplace_back(glm::vec3(1.f, 0.f, 0.1f), .3f, 1000.f);
+  m_balls[1].fix();
+  m_balls.emplace_back(glm::vec3(0.f, 0.f, 0.1f), .3f, 1000.f);
+  m_balls[2].fix();
+  cout << "Ground: " << glm::to_string(m_balls[2].pos()) << m_balls[2].rad() << endl;
+  float start_x, start_y, start_z = 0.1f;
+  srand(time(NULL));
+  for (int i=0; i<m_count; i++) {
+    start_x = rand()%18-9;
+    start_y = rand()%10+5;
+    start_x = 0; start_y = 10;
+    m_balls.emplace_back(glm::vec3(start_x, start_y, start_z));
+  }
+}
+void setup2(int m_count){
+  m_balls.reserve(2);
+
+  m_balls.emplace_back(glm::vec3(0.f,0.f,0.1f), 1.f, 10000.f);
+  m_balls[0].fix();
+  m_balls.emplace_back(glm::vec3(0.f,1.5f,0.1f), 0.5f, 1.f);
+}
 public:
   NormalDistribution(int m_count):
     m_renderObject(glm::vec3(0.0f), 0.3f)
   {
-    m_balls.reserve(m_count+3);
-
-    // m_balls.emplace_back(glm::vec3(-1000.f, 0.f, 0.1f), 990.f, 1000.f);
-    m_balls.emplace_back(glm::vec3(-1.f, 0.f, 0.1f), .3f, 1000.f);
-    m_balls[0].fix();
-    // m_balls.emplace_back(glm::vec3(1000.f, 0.f, 0.1f), 990.f, 1000.f);
-    // m_balls.emplace_back(glm::vec3(0.f, -1000.f, 0.1f), 1000.f, 1000.f);
-    m_balls.emplace_back(glm::vec3(1.f, 0.f, 0.1f), .3f, 1000.f);
-    m_balls[1].fix();
-    m_balls.emplace_back(glm::vec3(0.f, 0.f, 0.1f), .3f, 1000.f);
-    m_balls[2].fix();
-    cout << "Ground: " << glm::to_string(m_balls[2].pos()) << m_balls[2].rad() << endl;
-    float start_x, start_y, start_z = 0.1f;
     srand(time(NULL));
-    for (int i=0; i<m_count; i++) {
-      start_x = rand()%18-9;
-      start_y = rand()%10+5;
-      start_x = 0; start_y = 10;
-      m_balls.emplace_back(glm::vec3(start_x, start_y, start_z));
-    }
+
+    setup2(m_count);
   }
 
   void tick() {
-    static int i=0;
-
-    if (!i) {
-      // Ball a(glm::vec3(-1.f,0.f,0.f));
-      // a.setVel(glm::vec3(1.f,0.f,0.f));
-      // Ball b(glm::vec3(1.f,0.f,0.f));
-      // b.setVel(glm::vec3(-1.f,0.f,0.f));
-      Ball &a = m_balls[0], &b = m_balls[1];
-      double t = a.timeUntil(b);
-      printf("Time: %.2f\n", t);
-    }
-    i = 1;
     // Apply a constant amount of gravity each tick
     // Within each tick, ball trajectories are modeled as straight lines
     cout << "Grav" << endl;
@@ -235,12 +234,12 @@ public:
 
 
     double now = 0.0f;
-    double tick_duration = 2.5f;
+    double tick_duration = 0.5f;
     while (now < tick_duration) {
       // Process current collisions
-      for (int i=0; i<3; i++) {
+      for (int i=0; i<m_balls.size(); i++) {
         Ball &a = m_balls[i];
-        for (int j=max(3,i+1); j<m_balls.size(); j++) {
+        for (int j=i+1; j<m_balls.size(); j++) {
           Ball &b = m_balls[j];
           // cout << "old A @ " << glm::to_string(a.pos()) << " : " << glm::to_string(a.vel()) << endl;
           // cout << "old B @ " << glm::to_string(b.pos()) << " : " << glm::to_string(b.vel()) << endl;
@@ -253,12 +252,12 @@ public:
       // Check time for next collision
       cout << endl;
       double next_jump = tick_duration-now;
-      for (int i=2; i<3; i++) {
+      for (int i=0; i<m_balls.size(); i++) {
         Ball &a = m_balls[i];
         for (int j=i+1; j<m_balls.size(); j++) {
           Ball &b = m_balls[j];
           double time_to_collide = a.timeUntil(b);
-          if (time_to_collide > 0.02f) {
+          if (time_to_collide >= 0.f) {
             next_jump = time_to_collide < next_jump ?
               time_to_collide : next_jump;
             cout << "Ball " << i << " going to collide with " << j << " in " << time_to_collide << endl;
