@@ -43,6 +43,7 @@ class NormalDistribution {
     void update(float dt) {
       if (m_canmove)
         m_pos += m_vel*dt;
+      m_vel *= 0.999f;
     }
 
     float timeUntil (const Ball &o) {
@@ -122,6 +123,11 @@ class NormalDistribution {
     	return tmin;
     }
     void processInteraction (Ball &o) {
+
+      // Don't process interactions for fixed spheres
+      if (!m_canmove && !o.m_canmove)
+        return;
+
       // Assume this and o are colliding at their boundaries
       glm::vec3 delta = m_pos - o.m_pos;  // a - b, really doesn't matter
 
@@ -133,24 +139,17 @@ class NormalDistribution {
         return;
       }
       // impulse to this = K * (o.m_pos - m_pos)
-      double K = - 2 * (double)glm::dot(delta, m_vel-o.m_vel) / (double)glm::dot(delta, delta) * (double)(m_mass * o.m_mass) / (double)(m_mass + o.m_mass);
-
-      // Transfer impulses
-      // if (m_canmove && o.m_canmove) {
-        cout << "AColliding: " << sqrt(glm::dot(delta,delta)) << endl;
-        cout << "Vel: " << glm::to_string(o.m_vel) << "\tDelta: " << glm::to_string((float)K*delta/o.m_mass) << endl;
+      double K0 = - 2.0 * (double)glm::dot(delta, m_vel-o.m_vel) / (double)glm::dot(delta, delta);
+      if (m_canmove && o.m_canmove) {
+        double K = K0 * (double)(m_mass * o.m_mass) / (double)(m_mass + o.m_mass);
+        // cout << "AColliding: " << sqrt(glm::dot(delta,delta)) << endl;
+        // cout << "Vel: " << glm::to_string(o.m_vel) << "\tDelta: " << glm::to_string((float)K*delta/o.m_mass) << endl;
         m_vel += (float)K*delta/m_mass;
         o.m_vel -= (float)K*delta/o.m_mass;
-        // o.m_vel *= -1;
-      // } else if (m_canmove) {
-      //   cout << "BColliding: " << sqrt(glm::dot(delta,delta)) << endl;
-      //   m_vel += K*delta/m_mass;
-      // } else if (o.m_canmove) {
-      //   cout << "CColliding: " << sqrt(glm::dot(delta,delta)) << endl;
-      //   o.m_vel -= K*delta/o.m_mass;
-      // } else
-      // cout << "DColliding: " << sqrt(glm::dot(delta,delta)) << endl;
-      /* Wut? */;
+      } else if (m_canmove)
+        m_vel += (float)K0*delta;
+      else
+        o.m_vel -= (float)K0*delta;
 
     }
 
@@ -194,14 +193,14 @@ class NormalDistribution {
   void setup1(int m_count){
     m_balls.reserve(m_count+3);
 
-    // m_balls.emplace_back(glm::vec3(-1000.f, 0.f, 0.1f), 990.f, 1000.f);
-    m_balls.emplace_back(glm::vec3(-5.f, 0.f, 0.1f), 5.f, 1000.f);
+    m_balls.emplace_back(glm::vec3(-1000.f, 0.f, 0.1f), 990.f, 1000.f);
+    // m_balls.emplace_back(glm::vec3(-5.f, 0.f, 0.1f), 5.f, 1000.f);
     m_balls[0].fix();
-    // m_balls.emplace_back(glm::vec3(1000.f, 0.f, 0.1f), 990.f, 1000.f);
-    m_balls.emplace_back(glm::vec3(5.f, 0.f, 0.1f), 5.f, 1000.f);
+    m_balls.emplace_back(glm::vec3(1000.f, 0.f, 0.1f), 990.f, 1000.f);
+    // m_balls.emplace_back(glm::vec3(5.f, 0.f, 0.1f), 5.f, 1000.f);
     m_balls[1].fix();
-    // m_balls.emplace_back(glm::vec3(0.f, -1000.f, 0.1f), 1000.f, 1000.f);
-    m_balls.emplace_back(glm::vec3(0.f, -5.f, 0.1f), 5.f, 1000.f);
+    m_balls.emplace_back(glm::vec3(0.f, -1000.f, 0.1f), 1000.f, 1000.f);
+    // m_balls.emplace_back(glm::vec3(0.f, -5.f, 0.1f), 5.f, 1000.f);
     m_balls[2].fix();
     cout << "Ground: " << glm::to_string(m_balls[2].pos()) << m_balls[2].rad() << endl;
     float start_x, start_y, start_z = 0.1f;
@@ -209,15 +208,17 @@ class NormalDistribution {
       start_x = rand()%18-9;
       start_y = rand()%10+5;
       start_x = 4; start_y = 5.6f;
-      m_balls.emplace_back(glm::vec3(start_x, start_y, start_z), 0.1f);
+      m_balls.emplace_back(glm::vec3(start_x, start_y, start_z), 0.3f);
     }
   }
+
   void setup2(int m_count){
     m_balls.reserve(2);
 
     m_balls.emplace_back(glm::vec3(0.f,0.f,0.1f), 1.f, 10000.f);
     m_balls[0].fix();
-    m_balls.emplace_back(glm::vec3(0.f,1.5f,0.1f), 0.5f, 1.f);
+    m_balls.emplace_back(glm::vec3(.0f,6.5f,0.1f), 0.5f, 1.f);
+    m_balls.emplace_back(glm::vec3(.0000000001f,7.5f,0.1f), 0.5f, 1.f);
   }
 public:
   NormalDistribution(int m_count):
@@ -237,7 +238,7 @@ public:
 
 
     double now = 0.0f;
-    double tick_duration = .5f;
+    double tick_duration = .3f;
     while (now < tick_duration) {
       // Process current collisions
       for (int i=0; i<m_balls.size(); i++) {
@@ -265,22 +266,21 @@ public:
               time_to_collide : next_jump;
             cout << "Ball " << i << " going to collide with " << j << " in " << time_to_collide << endl;
           }
-          cout << "Time between " << i << " and " << j << " is " << time_to_collide << endl;
         }
       }
 
       //Update all balls up until the next collision
       // next_jump = 0.1f;
-      double pre_energy = 0, post_energy = 0;
-      for (int i=0; i<m_balls.size(); i++) {
-        pre_energy += glm::dot(m_balls[i].vel(), m_balls[i].vel());
-      }
+      // double pre_energy = 0, post_energy = 0;
+      // for (int i=0; i<m_balls.size(); i++) {
+      //   pre_energy += glm::dot(m_balls[i].vel(), m_balls[i].vel());
+      // }
       cout << "Next jump: " << next_jump << endl;
       updateAll(next_jump);
-      for (int i=0; i<m_balls.size(); i++) {
-        post_energy += glm::dot(m_balls[i].vel(), m_balls[i].vel());
-      }
-      cout << "Energy: " << 0.5*pre_energy << " --> " << 0.5*post_energy << endl << flush;
+      // for (int i=0; i<m_balls.size(); i++) {
+      //   post_energy += glm::dot(m_balls[i].vel(), m_balls[i].vel());
+      // }
+      // cout << "Energy: " << 0.5*pre_energy << " --> " << 0.5*post_energy << endl << flush;
       now += next_jump;
     }
 
