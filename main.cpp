@@ -92,7 +92,7 @@ int main () {
   glfwGetCursorPos(window, cursor_prev, cursor_prev+1);
   double cam_yaw = -3.14159/2, cam_pitch;
 
-  bool control = false;
+  bool shift = false, control = false;
   bool nums[10] = {false};
   bool nums_last[10] = {false};
 
@@ -136,6 +136,7 @@ int main () {
         nums_last[i] = nums[i];
 
       // GLFW_KEY_# for 0 <= # <= 9 equals 48+#
+      shift = glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS;
       control = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
       for (int i=1; i<10; i++)
         nums[i] = glfwGetKey(window, GLFW_KEY_0 + i) == GLFW_PRESS;
@@ -163,10 +164,12 @@ int main () {
         tick_stop = false;
 
       for (int i=1; i<10; i++) {
-        if (!nums_last[i] && nums[i]) {
-          for (int t=0; t<i; t++)
-            simulation.tick();
-          break;
+        if (shift) {
+          if (!nums_last[i] && nums[i]) {
+            for (int t=0; t<i; t++)
+              simulation.tick();
+            break;
+          }
         } else if (control) {
           if (nums[i]) {
             for (int t=0; t<i; t++)
