@@ -6,7 +6,9 @@
 #include <Marble.h>
 
 Marble::Marble (glm::vec3 pos, double rad):
-	m_pos(pos), m_vel(0.0f), m_radius(rad)
+	m_pos(pos), m_vel(0.0f),
+	m_radius(rad),
+	m_rgb(0.f)
 {
 	LoadObjectModel();
 }
@@ -24,6 +26,9 @@ void Marble::AddPos (glm::vec3 rel_pos) {
 void Marble::SetRad (double radius) {
 	m_radius = radius;
 }
+void Marble::SetRGB (glm::vec3 rgb) {
+	m_rgb = rgb;
+}
 
 void Marble::Render (Shader &shader) {
 	glm::mat4 model =
@@ -39,6 +44,7 @@ void Marble::Render (Shader &shader) {
 
 	shader.setModel(model);
 	shader.setLocal(local);
+	shader.setVec3("rgb", m_rgb);
 
 	glBindVertexArray(m_vao);
 	glDrawElements(GL_TRIANGLES, m_vertices, GL_UNSIGNED_INT, (void*)0);

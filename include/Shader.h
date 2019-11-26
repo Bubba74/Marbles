@@ -5,6 +5,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/mat4x4.hpp>
+#include <glm/vec3.hpp>
 
 #include <string>
 
@@ -25,6 +26,7 @@ public:
   void setInt   (std::string key, int value);
   void setBool  (std::string key, bool value);
   void setFloat (std::string key, float value);
+  void setVec3 (std::string key, glm::vec3 value);
 };
 
 #endif

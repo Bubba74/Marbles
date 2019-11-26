@@ -81,16 +81,21 @@ void Shader::setLocal(glm::mat4 transform) {
 }
 
 void Shader::setInt (string key, int value){
-  unsigned int vertexLocation = glGetUniformLocation(m_ID, key.c_str());
-  glUniform1i(vertexLocation, value);
+  unsigned int loc = glGetUniformLocation(m_ID, key.c_str());
+  glUniform1i(loc, value);
 }
 void Shader::setBool (string key, bool value){
-  unsigned int vertexLocation = glGetUniformLocation(m_ID, key.c_str());
-  glUniform1i(vertexLocation, value);
+  unsigned int loc = glGetUniformLocation(m_ID, key.c_str());
+  glUniform1i(loc, value);
 }
 void Shader::setFloat (string key, float value){
-  unsigned int vertexLocation = glGetUniformLocation(m_ID, key.c_str());
-  glUniform1f(vertexLocation, value);}
+  unsigned int loc = glGetUniformLocation(m_ID, key.c_str());
+  glUniform1f(loc, value);
+}
+void Shader::setVec3 (string key, glm::vec3 value){
+  unsigned int loc = glGetUniformLocation(m_ID, key.c_str());
+  glUniform3f(loc, value[0], value[1], value[2]);
+}
 
 //#define DEBUG
 string Shader::readFile(string path){

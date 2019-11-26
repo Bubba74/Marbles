@@ -11,6 +11,7 @@ class Marble {
 
 	double m_radius;
 	glm::vec3 m_pos, m_vel;
+	glm::vec3 m_rgb;
 
 	void LoadObjectModel ();
 public:
@@ -23,6 +24,7 @@ public:
   void AddPos (glm::vec3 rel_pos);
 	void SetVel (glm::vec3 vel);
 	void SetRad (double);
+	void SetRGB (glm::vec3 rgb);
 
 	double TimeUntil (const Marble &other);
 	void Collide (const Marble &other);
