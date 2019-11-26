@@ -56,7 +56,6 @@ class NormalDistribution {
     void update(float dt) {
       if (m_canmove)
         m_pos += m_vel*dt;
-      m_vel *= 0.99f;
     }
 
     float timeUntil (const Ball &o) {
@@ -171,6 +170,7 @@ class NormalDistribution {
     void grav() {
       if (m_canmove)
         m_vel.y -= 0.01f;
+      m_vel *= 0.99f;
     }
     void bouncex() {
       m_vel.x *= -1.0f;
