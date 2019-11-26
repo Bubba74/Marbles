@@ -57,7 +57,8 @@ int main () {
     glBindVertexArray(0);
   }
 
-  string project_dir = "/home/lil/Desktop/NormalDistribution";
+  string project_dir = "/home/henry/Desktop/Marbles";
+  //string project_dir = "/home/lil/Desktop/NormalDistribution";
   Shader shader(project_dir+"/shaders/triangle_vert.glsl", project_dir+"/shaders/triangle_frag.glsl");
 
   float fov = 3.14159f/2, near = 0.2f, far = 10000.0f;
@@ -83,7 +84,7 @@ int main () {
   // Background unit grid
   Grid grid;
   // Simulation
-  NormalDistribution simulation (1);
+  NormalDistribution simulation (2);
   bool tick_stop = false;
 
   // Track cursor movement

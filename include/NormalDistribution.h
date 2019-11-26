@@ -43,7 +43,7 @@ class NormalDistribution {
     void update(float dt) {
       if (m_canmove)
         m_pos += m_vel*dt;
-      m_vel *= 0.999f;
+      // m_vel *= 0.99f;
     }
 
     float timeUntil (const Ball &o) {
@@ -193,21 +193,26 @@ class NormalDistribution {
   void setup1(int m_count){
     m_balls.reserve(m_count+3);
 
-    m_balls.emplace_back(glm::vec3(-1000.f, 0.f, 0.1f), 990.f, 1000.f);
+    m_balls.emplace_back(glm::vec3(-990.5f, 0.f, 0.1f), 990.f, 1000.f);
     // m_balls.emplace_back(glm::vec3(-5.f, 0.f, 0.1f), 5.f, 1000.f);
     m_balls[0].fix();
-    m_balls.emplace_back(glm::vec3(1000.f, 0.f, 0.1f), 990.f, 1000.f);
+
+    m_balls.emplace_back(glm::vec3(990.5f, 0.f, 0.1f), 990.f, 1000.f);
     // m_balls.emplace_back(glm::vec3(5.f, 0.f, 0.1f), 5.f, 1000.f);
     m_balls[1].fix();
+
     m_balls.emplace_back(glm::vec3(0.f, -1000.f, 0.1f), 1000.f, 1000.f);
     // m_balls.emplace_back(glm::vec3(0.f, -5.f, 0.1f), 5.f, 1000.f);
     m_balls[2].fix();
-    cout << "Ground: " << glm::to_string(m_balls[2].pos()) << m_balls[2].rad() << endl;
+
+    // cout << "Ground: " << glm::to_string(m_balls[2].pos()) << m_balls[2].rad() << endl;
     float start_x, start_y, start_z = 0.1f;
     for (int i=0; i<m_count; i++) {
-      start_x = rand()%18-9;
-      start_y = rand()%10+5;
-      start_x = 4; start_y = 5.6f;
+      // start_x = rand()%18-9;
+      // start_y = rand()%10+5;
+      start_x = -0.1 + i*0.1f;
+      start_y = 5+3*i;
+      //start_x = 4; start_y = 5.6f;
       m_balls.emplace_back(glm::vec3(start_x, start_y, start_z), 0.3f);
     }
   }

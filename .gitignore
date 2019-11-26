@@ -1,10 +1,11 @@
 
-# Library includes
+# glm	https://github.com/g-truc/glm/releases/download/0.9.9.6/glm-0.9.9.6.zip
 glm
+
+# Glad	https://glad.dav1d.de/generated/tmp3SYR39glad/glad.zip
 include/glad
 include/KHR
-
-# Glad lib source
 src/glad.c
 
+build
 notes
