@@ -92,6 +92,10 @@ int main () {
   glfwGetCursorPos(window, cursor_prev, cursor_prev+1);
   double cam_yaw = -3.14159/2, cam_pitch;
 
+  bool shift = false, control = false;
+  bool nums[10] = {false};
+  bool nums_last[10] = {false};
+
   int count = 0;
   glClearColor(0.3, 0.1, 0.5, 1);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -101,6 +105,8 @@ int main () {
     if (glfwGetKey(window, GLFW_KEY_C) != GLFW_PRESS)
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glm::mat4 view;
+    {
     cam_pos += .1f * glm::vec3(
       glfwGetKey(window, GLFW_KEY_D) - glfwGetKey(window, GLFW_KEY_A),
       glfwGetKey(window, GLFW_KEY_SPACE) - glfwGetKey(window, GLFW_KEY_LEFT_SHIFT),
@@ -118,31 +124,76 @@ int main () {
       sinf(cam_pitch),
       cosf(cam_pitch)*sinf(cam_yaw)
     };
-    glm::mat4 view = glm::lookAt(
+    view = glm::lookAt(
       cam_pos,
       cam_pos+cam_dir,
       glm::vec3(0,1,0)
     );
+    }
+
+    { // Controls
+      for (int i=1; i<10; i++)
+        nums_last[i] = nums[i];
+
+      // GLFW_KEY_# for 0 <= # <= 9 equals 48+#
+      shift = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
+      control = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
+      for (int i=1; i<10; i++)
+        nums[i] = glfwGetKey(window, GLFW_KEY_0 + i) == GLFW_PRESS;
+    }
 
     shader.use();
     shader.setView(view);
     grid.Render(shader);
     simulation.Render(shader);
 
-    if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
-      simulation.tick();
-    if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
-      if (!tick_stop)
+    do { // Simulation Running
+      if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
         simulation.tick();
-      tick_stop = true;
-    } else
-      tick_stop = false;
+        break;
+      }
+
+      if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+        if (!tick_stop)
+        simulation.tick();
+        tick_stop = true;
+        break;
+      } else
+        tick_stop = false;
+
+      for (int i=1; i<10; i++) {
+        if (shift) {
+          if (!nums_last[i] && nums[i]) {
+            for (int t=0; t<i; t++)
+              simulation.tick();
+            break;
+          }
+        } else if (control) {
+          if (nums[i]) {
+            for (int t=0; t<i; t++)
+              simulation.tick();
+            break;
+          }
+        } else {
+          if (nums[i]) {
+            if (count % i == 0)
+              simulation.tick();
+            break;
+          }
+        }
+      }
+
+    } while(false);
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
       glfwSetWindowShouldClose(window, GL_TRUE);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
+    count++;
+    // Just check for overflow, silently fix it.
+    if (count > 2000000000)
+      count = 0;
   }
 }
 
