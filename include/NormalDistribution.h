@@ -32,11 +32,12 @@ class NormalDistribution {
   class Ball {
     glm::vec3 m_pos, m_vel;
     float m_rad, m_mass;
+    glm::vec3 m_color;
     bool m_canmove;
   public:
     Ball (glm::vec3 pos, float rad=0.3f, float mass=1.f):
       m_pos(pos), m_vel((rand()%2)/1000.0f,(rand()%5)/250.f, 0),
-      m_rad(rad), m_mass(mass),
+      m_rad(rad), m_mass(mass), m_color(getNewColor()),
       m_canmove(true)
     {
     }
@@ -48,6 +49,9 @@ class NormalDistribution {
     }
     float rad() {
       return m_rad;
+    }
+    glm::vec3 color() {
+      return m_color;
     }
     void fix(){
       m_canmove = false;
@@ -191,6 +195,18 @@ class NormalDistribution {
 
     void setVel(glm::vec3 new_vel) {
       m_vel = new_vel;
+    }
+    glm::vec3 getNewColor() {
+      static int i = 0;
+      glm::vec3 colors[] = {
+        {0.8f, 0.2f, 0.f},
+        {0.2f, 0.3f, 0.9f},
+        {0.7f, 0.3f, 0.4f},
+        {0.5f, 0.6f, 0.3f},
+        {0.3f, 0.1f, 0.1f},
+        {0.1f, 0.0f, 0.3f},
+      };
+      return colors[i++ % 6];
     }
   };
 
@@ -352,6 +368,7 @@ public:
     for (int i=0; i<m_balls.size(); i++) {
       m_renderObject.SetPos(m_balls[i].pos());
       m_renderObject.SetRad(m_balls[i].rad());
+      m_renderObject.SetRGB(m_balls[i].color());
       m_renderObject.Render(shader);
     }
   }
