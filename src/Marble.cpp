@@ -134,10 +134,10 @@ void Marble::LoadObjectModel () {
 		Model will be a poly, with (deprecated) side-length 1/sqrt(2)
 		Thus, it's circumscribed circle will have radius 1
 	*/
-	const int segments = 240;
+	const int segments = 2400;
 	glm::vec3 poly[1+segments];
 
-	poly[0] = glm::vec3(0.0f);
+	poly[0] = glm::vec3(0.f,0.f,0.1f);
 	for (int i=0; i<segments; i++) {
 		float theta = i*2.0f*3.14159f/segments;
 		poly[i+1] =
