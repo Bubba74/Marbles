@@ -150,7 +150,7 @@ class NormalDistribution {
       float dist = glm::dot(delta, delta);
       float radii = (m_rad+o.m_rad) * (m_rad+o.m_rad);
       if (b >= 0 || sqrt(dist) > sqrt(radii)+0.001f) {
-        cout << "Skipping collision: " << sqrt(dist) << " > " << sqrt(radii) << endl;
+        // cout << "Skipping collision: " << sqrt(dist) << " > " << sqrt(radii) << endl;
         return;
       }
       // impulse to this = K * (o.m_pos - m_pos)
@@ -208,11 +208,13 @@ class NormalDistribution {
   void setup1(int m_count){
     m_balls.reserve(m_count+3);
 
-    m_balls.emplace_back(glm::vec3(-990.5f, 0.f, 0.1f), 990.f, 1000.f);
+    m_balls.emplace_back(glm::vec3(-501.f, -10.f, 0.1f), 500.f, 1000.f);
+    // m_balls.emplace_back(glm::vec3(-990.5f, 0.f, 0.1f), 990.f, 1000.f);
     // m_balls.emplace_back(glm::vec3(-5.f, 0.f, 0.1f), 5.f, 1000.f);
     m_balls[0].fix();
 
-    m_balls.emplace_back(glm::vec3(990.5f, 0.f, 0.1f), 990.f, 1000.f);
+    m_balls.emplace_back(glm::vec3(501.f, -10.f, 0.1f), 500.f, 1000.f);
+    // m_balls.emplace_back(glm::vec3(990.5f, 0.f, 0.1f), 990.f, 1000.f);
     // m_balls.emplace_back(glm::vec3(5.f, 0.f, 0.1f), 5.f, 1000.f);
     m_balls[1].fix();
 
@@ -252,26 +254,28 @@ public:
   void tick() {
     // Apply a constant amount of gravity each tick
     // Within each tick, ball trajectories are modeled as straight lines
-    cout << "Grav" << endl;
+    // cout << "Grav" << endl;
     for (int i=0; i<m_balls.size(); i++)
       m_balls[i].grav();
-
 
     double now = 0.0f;
     double tick_duration = .3f;
     Collision next(-1, -1, tick_duration);
     while (now < tick_duration) {
       // Process current collisions
-      if (next.ball_i >= 0 && next.ball_j >= 0) {
-        Ball &a = m_balls[next.ball_i];
-        Ball &b = m_balls[next.ball_j];
-        cout << next.ball_i << ": " << glm::to_string(a.pos()) << " with vel " << glm::to_string(a.vel()) << endl;
-        cout << next.ball_j << ": " << glm::to_string(b.pos()) << " with vel " << glm::to_string(b.vel()) << endl;
-        a.processInteraction(b);
-        cout << "\tBecomes" << endl;
-        cout << next.ball_i << ": " << glm::to_string(a.pos()) << " with vel " << glm::to_string(a.vel()) << endl;
-        cout << next.ball_j << ": " << glm::to_string(b.pos()) << " with vel " << glm::to_string(b.vel()) << endl;
-      }
+      int i = next.ball_i, j = next.ball_j;
+      for (int i=0; i<m_balls.size(); i++)
+        for (int j=i+1; j<m_balls.size(); j++)
+          if (i >= 0 && j >= 0) {
+            Ball &a = m_balls[i];
+            Ball &b = m_balls[j];
+            // cout << i << ": " << glm::to_string(a.pos()) << " with vel " << glm::to_string(a.vel()) << endl;
+            // cout << j << ": " << glm::to_string(b.pos()) << " with vel " << glm::to_string(b.vel()) << endl;
+            a.processInteraction(b);
+            // cout << "\tBecomes" << endl;
+            // cout << i << ": " << glm::to_string(a.pos()) << " with vel " << glm::to_string(a.vel()) << endl;
+            // cout << j << ": " << glm::to_string(b.pos()) << " with vel " << glm::to_string(b.vel()) << endl;
+          }
       #if 0
       for (int i=0; i<m_balls.size(); i++) {
         Ball &a = m_balls[i];
@@ -287,7 +291,7 @@ public:
       #endif
 
       // Check time for next collision
-      cout << endl;
+      // cout << endl;
       // double next_jump = tick_duration-now;
       next.reset(tick_duration - now);
       for (int i=0; i<m_balls.size(); i++) {
@@ -299,7 +303,7 @@ public:
             next.time = time_to_collide;
             next.ball_i = i;
             next.ball_j = j;
-            cout << "Ball " << i << " going to collide with " << j << " in " << time_to_collide << endl;
+            // cout << "Ball " << i << " going to collide with " << j << " in " << time_to_collide << endl;
           }
         }
       }
@@ -318,7 +322,10 @@ public:
       // cout << "Energy: " << 0.5*pre_energy << " --> " << 0.5*post_energy << endl << flush;
       now += next.time;
     }
+  }
 
+  void addMarble() {
+    m_balls.emplace_back(glm::vec3(0.f, 10.f + m_balls.size(), 0.1f), 0.1f);
   }
 
   void Render(Shader &shader) {

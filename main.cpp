@@ -153,8 +153,10 @@ int main () {
       }
 
       if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
-        if (!tick_stop)
-        simulation.tick();
+        if (!tick_stop) {
+          simulation.tick();
+          simulation.addMarble();
+        }
         tick_stop = true;
         break;
       } else
