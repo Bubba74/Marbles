@@ -16,6 +16,19 @@ using namespace std;
 #define EPSILON 0.0000001f
 
 class NormalDistribution {
+  struct Collision {
+    int ball_i, ball_j;
+    float time;
+
+    Collision (int i, int j, float t):
+      ball_i(i), ball_j(j), time(t) {}
+    void reset (float t) {
+      ball_i = -1;
+      ball_j = -1;
+      time = t;
+    }
+  };
+
   class Ball {
     glm::vec3 m_pos, m_vel;
     float m_rad, m_mass;
@@ -43,7 +56,7 @@ class NormalDistribution {
     void update(float dt) {
       if (m_canmove)
         m_pos += m_vel*dt;
-      // m_vel *= 0.99f;
+      m_vel *= 0.99f;
     }
 
     float timeUntil (const Ball &o) {
@@ -134,8 +147,10 @@ class NormalDistribution {
       glm::fvec3 dvel = m_vel - o.m_vel;
     	float b = 2.0f * glm::dot(delta, dvel);
 
-      if (b >= 0 || glm::dot(delta, delta) > (m_rad + o.m_rad)*(m_rad + o.m_rad)) {
-        // printf("Not colliding: %.f\n", glm::dot(delta, delta));
+      float dist = glm::dot(delta, delta);
+      float radii = (m_rad+o.m_rad) * (m_rad+o.m_rad);
+      if (b >= 0 || sqrt(dist) > sqrt(radii)+0.001f) {
+        cout << "Skipping collision: " << sqrt(dist) << " > " << sqrt(radii) << endl;
         return;
       }
       // impulse to this = K * (o.m_pos - m_pos)
@@ -244,8 +259,20 @@ public:
 
     double now = 0.0f;
     double tick_duration = .3f;
+    Collision next(-1, -1, tick_duration);
     while (now < tick_duration) {
       // Process current collisions
+      if (next.ball_i >= 0 && next.ball_j >= 0) {
+        Ball &a = m_balls[next.ball_i];
+        Ball &b = m_balls[next.ball_j];
+        cout << next.ball_i << ": " << glm::to_string(a.pos()) << " with vel " << glm::to_string(a.vel()) << endl;
+        cout << next.ball_j << ": " << glm::to_string(b.pos()) << " with vel " << glm::to_string(b.vel()) << endl;
+        a.processInteraction(b);
+        cout << "\tBecomes" << endl;
+        cout << next.ball_i << ": " << glm::to_string(a.pos()) << " with vel " << glm::to_string(a.vel()) << endl;
+        cout << next.ball_j << ": " << glm::to_string(b.pos()) << " with vel " << glm::to_string(b.vel()) << endl;
+      }
+      #if 0
       for (int i=0; i<m_balls.size(); i++) {
         Ball &a = m_balls[i];
         for (int j=i+1; j<m_balls.size(); j++) {
@@ -257,18 +284,21 @@ public:
           // cout << "new B @ " << glm::to_string(b.pos()) << " : " << glm::to_string(b.vel()) << endl;
         }
       }
+      #endif
 
       // Check time for next collision
       cout << endl;
-      double next_jump = tick_duration-now;
+      // double next_jump = tick_duration-now;
+      next.reset(tick_duration - now);
       for (int i=0; i<m_balls.size(); i++) {
         Ball &a = m_balls[i];
         for (int j=i+1; j<m_balls.size(); j++) {
           Ball &b = m_balls[j];
           double time_to_collide = a.timeUntil(b);
-          if (time_to_collide >= 0.f) {
-            next_jump = time_to_collide < next_jump ?
-              time_to_collide : next_jump;
+          if (time_to_collide >= 0.f && time_to_collide < next.time) {
+            next.time = time_to_collide;
+            next.ball_i = i;
+            next.ball_j = j;
             cout << "Ball " << i << " going to collide with " << j << " in " << time_to_collide << endl;
           }
         }
@@ -280,13 +310,13 @@ public:
       // for (int i=0; i<m_balls.size(); i++) {
       //   pre_energy += glm::dot(m_balls[i].vel(), m_balls[i].vel());
       // }
-      cout << "Next jump: " << next_jump << endl;
-      updateAll(next_jump);
+      // cout << "Next jump: " << next.time << endl;
+      updateAll(next.time);
       // for (int i=0; i<m_balls.size(); i++) {
       //   post_energy += glm::dot(m_balls[i].vel(), m_balls[i].vel());
       // }
       // cout << "Energy: " << 0.5*pre_energy << " --> " << 0.5*post_energy << endl << flush;
-      now += next_jump;
+      now += next.time;
     }
 
   }

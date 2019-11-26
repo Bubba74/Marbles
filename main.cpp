@@ -84,7 +84,7 @@ int main () {
   // Background unit grid
   Grid grid;
   // Simulation
-  NormalDistribution simulation (2);
+  NormalDistribution simulation (5);
   bool tick_stop = false;
 
   // Track cursor movement
