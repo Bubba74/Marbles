@@ -206,31 +206,51 @@ class NormalDistribution {
   }
 
   void setup1(int m_count){
-    m_balls.reserve(m_count+3);
+    m_balls.reserve(m_count+5);
 
-    m_balls.emplace_back(glm::vec3(-501.f, -10.f, 0.1f), 500.f, 1000.f);
-    // m_balls.emplace_back(glm::vec3(-990.5f, 0.f, 0.1f), 990.f, 1000.f);
+    // m_balls.emplace_back(glm::vec3(-501.f, -10.f, 0.1f), 500.f, 1000.f);
+    m_balls.emplace_back(glm::vec3(-999.5f, 0.f, 0.1f), 990.f, 1000.f);
     // m_balls.emplace_back(glm::vec3(-5.f, 0.f, 0.1f), 5.f, 1000.f);
     m_balls[0].fix();
 
-    m_balls.emplace_back(glm::vec3(501.f, -10.f, 0.1f), 500.f, 1000.f);
-    // m_balls.emplace_back(glm::vec3(990.5f, 0.f, 0.1f), 990.f, 1000.f);
+    // m_balls.emplace_back(glm::vec3(501.f, -10.f, 0.1f), 500.f, 1000.f);
+    m_balls.emplace_back(glm::vec3(999.5f, 0.f, 0.1f), 990.f, 1000.f);
     // m_balls.emplace_back(glm::vec3(5.f, 0.f, 0.1f), 5.f, 1000.f);
     m_balls[1].fix();
 
-    m_balls.emplace_back(glm::vec3(0.f, -1000.f, 0.1f), 1000.f, 1000.f);
+    m_balls.emplace_back(glm::vec3(100.f, -1200.f, 0.1f), 1000.f, 1000.f);
     // m_balls.emplace_back(glm::vec3(0.f, -5.f, 0.1f), 5.f, 1000.f);
     m_balls[2].fix();
+
+    m_balls.emplace_back(glm::vec3(5.f, 16.f, 0.1f), 4.5f);
+    m_balls[3].fix();
+    m_balls.emplace_back(glm::vec3(-5.f, 16.f, 0.1f), 4.5f);
+    m_balls[4].fix();
+    m_balls.emplace_back(glm::vec3(10.f, 20.f, 0.1f), 5.f);
+    m_balls[5].fix();
+    m_balls.emplace_back(glm::vec3(-10.f, 20.f, 0.1f), 5.f);
+    m_balls[6].fix();
+
+    for (int row=0; row<7; row++) {
+      for (int col=0; col<row+1; col++) {
+        float y = 10-row;
+        float x = row/2.f-col;
+        x *= 2.5f;
+        y *= 1.2f;
+        m_balls.emplace_back(glm::vec3(x,y,0.1f), 0.1f);
+        m_balls.back().fix();
+      }
+    }
 
     // cout << "Ground: " << glm::to_string(m_balls[2].pos()) << m_balls[2].rad() << endl;
     float start_x, start_y, start_z = 0.1f;
     for (int i=0; i<m_count; i++) {
       // start_x = rand()%18-9;
       // start_y = rand()%10+5;
-      start_x = -0.1 + i*0.1f;
-      start_y = 5+3*i;
+      start_x = 1.5 + i*0.1f;
+      start_y = 25+3*i;
       //start_x = 4; start_y = 5.6f;
-      m_balls.emplace_back(glm::vec3(start_x, start_y, start_z), 0.3f);
+      m_balls.emplace_back(glm::vec3(start_x, start_y, start_z), 0.15f);
     }
   }
 
